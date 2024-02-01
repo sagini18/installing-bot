@@ -8,7 +8,6 @@ function App() {
         <a
           className="App-link"
           href="https://github.com/apps/pr-comment-on-build/installations/new"
-          rel="noopener noreferrer"
         >
         <img 
         src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/GitHub_Invertocat_Logo.svg/1200px-GitHub_Invertocat_Logo.svg.png'
