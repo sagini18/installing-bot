@@ -14,22 +14,19 @@ const privateKey = fs.readFileSync(privateKeyPath, "utf8");
 
 const pullRequestHandler = Router();
 
-const app = new App({
-  appId: appId,
-  privateKey: privateKey,
-  webhooks: {
-    secret: webhookSecret,
-  },
-});
+const handlePullRequestOpened = async (payload) => {
+  const installationId = payload?.installation?.id;
+  const app = new App({
+    appId: appId,
+    privateKey: privateKey,
+    webhooks: {
+      secret: webhookSecret,
+    },
+    installationId,
+  });
+  const octokit = await app.getInstallationOctokit(installationId);
 
-
-
-
-const handlePullRequestOpened = async (octokit, payload ) => {
-  console.log("Received a pull request event");
-  console.log(
-    `Received a pull request event for #${payload?.number}`
-  );
+  console.log(`Received a pull request event for #${payload?.number}`);
   console.log(`The title: ${payload?.pull_request?.title}`);
   console.log(`The comment_contents: ${payload?.pull_request?.body}`);
 
@@ -37,8 +34,6 @@ const handlePullRequestOpened = async (octokit, payload ) => {
     "Thanks for opening a new PR! Please follow our contributing guidelines to make your PR easier to review.";
 
   try {
-    console.log(payload?.installation?.id);
-    console.log(payload?.installation?.node_id);
     await octokit?.request(
       "POST /repos/{owner}/{repo}/issues/{issue_number}/comments",
       {
@@ -49,7 +44,6 @@ const handlePullRequestOpened = async (octokit, payload ) => {
         headers: {
           "x-github-api-version": "2022-11-28",
         },
-        installationId: payload?.installation?.node_id,
       }
     );
   } catch (error) {
@@ -64,16 +58,7 @@ const handlePullRequestOpened = async (octokit, payload ) => {
 
 pullRequestHandler.post("/webhook", (req, res) => {
   console.log("Received a POST request to /webhook");
-  console.log(req.body);  
-  handlePullRequestOpened(app.octokit, req.body);
-
-  app.webhooks.onError((error) => {
-    if (error.name === "AggregateError") {
-      console.error(`Error processing request: ${error.event}`);
-    } else {
-      console.error(error);
-    }
-  });
+  handlePullRequestOpened(req.body);
 });
 
 export default pullRequestHandler;
