@@ -11,29 +11,28 @@ import http from "http";
 dotenv.config();
 
 // This assigns the values of your environment variables to local variables.
-const appId = process.env.APP_ID || 0;
-const webhookSecret = process.env.WEBHOOK_SECRET || "";
-const privateKeyPath = process.env.PRIVATE_KEY_PATH || "";
+const appId = process.env.APP_ID;
+const webhookSecret = process.env.WEBHOOK_SECRET;
+const privateKeyPath = process.env.PRIVATE_KEY_PATH;
 
-    const privateKey = fs.readFileSync(privateKeyPath, "utf8");
+// This reads the contents of your private key file.
+const privateKey = fs.readFileSync(privateKeyPath, "utf8");
 
-    // This creates a new instance of the Octokit App class.
-    const app = new App({
-        appId: appId,
-        privateKey: privateKey,
-        webhooks: {
-            secret: webhookSecret
-        },
-    });
+// This creates a new instance of the Octokit App class.
+const app = new App({
+  appId: appId,
+  privateKey: privateKey,
+  webhooks: {
+    secret: webhookSecret
+  },
+});
 
 // This defines the message that your app will post to pull requests.
 const messageForNewPRs = "Thanks for opening a new PR! Please follow our contributing guidelines to make your PR easier to review.";
 
 // This adds an event handler that your code will call later. When this event handler is called, it will log the event to the console. Then, it will use GitHub's REST API to add a comment to the pull request that triggered the event.
-async function handlePullRequestOpened({octokit, payload}: {octokit: any, payload: any}) {
+async function handlePullRequestOpened({octokit, payload}) {
   console.log(`Received a pull request event for #${payload.pull_request.number}`);
-  console.log(`The title: ${payload.pull_request.title}`);
-  console.log(`The comment_contents: ${payload.pull_request.body}`);
 
   try {
     await octokit.request("POST /repos/{owner}/{repo}/issues/{issue_number}/comments", {
@@ -45,7 +44,7 @@ async function handlePullRequestOpened({octokit, payload}: {octokit: any, payloa
         "x-github-api-version": "2022-11-28",
       },
     });
-  } catch (error : any) {
+  } catch (error) {
     if (error.response) {
       console.error(`Error! Status: ${error.response.status}. Message: ${error.response.data.message}`)
     }
@@ -57,7 +56,7 @@ async function handlePullRequestOpened({octokit, payload}: {octokit: any, payloa
 app.webhooks.on("pull_request.opened", handlePullRequestOpened);
 
 // This logs any errors that occur.
-app.webhooks.onError((error:any) => {
+app.webhooks.onError((error) => {
   if (error.name === "AggregateError") {
     console.error(`Error processing request: ${error.event}`);
   } else {
