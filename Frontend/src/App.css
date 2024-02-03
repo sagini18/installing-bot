@@ -16,14 +16,19 @@
 .App-button{
   background-color: #456c77;
   border: none;
+  display: flex;
+  align-items: center;
   text-align: center;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 17px;
   border-radius: 10px;
+  padding: 10px;
+  font-weight: 600;
 }
 
 .App-button:hover{
   background-color:azure;
+  cursor: pointer;
 }
 
 .App-link {
