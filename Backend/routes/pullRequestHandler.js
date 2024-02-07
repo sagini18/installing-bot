@@ -14,6 +14,7 @@ const privateKey = fs.readFileSync(privateKeyPath, "utf8");
 
 const pullRequestHandler = Router();
 
+
 const handlePullRequestOpened = async (payload) => {
   const installationId = payload?.installation?.id;
   const app = new App({
@@ -57,8 +58,7 @@ const handlePullRequestOpened = async (payload) => {
 };
 
 pullRequestHandler.post("/webhook", (req, res) => {
-  console.log("Received a POST request to /webhook");
-  handlePullRequestOpened(req.body);
+  req.body.action === "opened" && handlePullRequestOpened(req.body);
 });
 
-export default pullRequestHandler;
+export { pullRequestHandler };

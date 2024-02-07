@@ -2,6 +2,7 @@ import e, { Router } from "express";
 import axios from "axios";
 
 const auth = Router();
+var token = null;
 
 //// if authorization is required from server side only
 // auth.get("/authorize", (req, res) => {
@@ -10,7 +11,8 @@ const auth = Router();
 // });
 
 auth.get("/callback", (req, res) => {
-  const tokenURL = `https://github.com/login/oauth/access_token?client_id=${process.env.CLIENT_ID}&client_secret=${process.env.CLIENT_SECRET}&code=${req.query.code}`;
+  const code = req?.query?.code;
+  const tokenURL = `https://github.com/login/oauth/access_token?client_id=${process.env.CLIENT_ID}&client_secret=${process.env.CLIENT_SECRET}&code=${code}`;
   axios
     .post(tokenURL, null, {
       headers: {
@@ -18,10 +20,11 @@ auth.get("/callback", (req, res) => {
       },
     })
     .then((response) => {
-      const token = response?.data?.access_token;
-      if (!token) {
+      token = response?.data?.access_token;
+      if (token == null) {
         res.send("Token not found");
-      }else{
+      } else {
+        console.log("Token from auth:", token);
         res.redirect(process.env.AFTER_AUTHORIZED_REDIRECT_URL);
       }
     })
@@ -30,4 +33,4 @@ auth.get("/callback", (req, res) => {
     });
 });
 
-export default auth;
+export {auth,token};
