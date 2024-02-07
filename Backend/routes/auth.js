@@ -3,6 +3,7 @@ import axios from "axios";
 
 const auth = Router();
 var token = null;
+var owner;
 
 //// if authorization is required from server side only
 // auth.get("/authorize", (req, res) => {
@@ -21,10 +22,23 @@ auth.get("/callback", (req, res) => {
     })
     .then((response) => {
       token = response?.data?.access_token;
+      // get owner
+      axios
+        .get("https://api.github.com/user", {
+          headers: {
+            Authorization: `token ${token}`,
+          },
+        })
+        .then((response) => {
+          owner = response.data?.login;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      // end get owner
       if (token == null) {
         res.send("Token not found");
       } else {
-        console.log("Token from auth:", token);
         res.redirect(process.env.AFTER_AUTHORIZED_REDIRECT_URL);
       }
     })
@@ -33,4 +47,4 @@ auth.get("/callback", (req, res) => {
     });
 });
 
-export {auth,token};
+export { auth, token, owner };
