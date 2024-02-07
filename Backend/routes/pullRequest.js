@@ -58,12 +58,15 @@ pullRequest.post("/comment", async (req, res) => {
     res.send("Token not found");
     return;
   }
-  await octokit.issues
-    .createComment({
+  await octokit
+    ?.request("POST /repos/{owner}/{repo}/issues/{issue_number}/comments", {
       owner: owner,
       repo: repoName,
       issue_number: prNumber,
       body: comment,
+      headers: {
+        "x-github-api-version": "2022-11-28",
+      },
     })
     .then((response) => {
       res.send("Comment added successfully");
